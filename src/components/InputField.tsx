@@ -86,11 +86,13 @@ function InputField({unit, amount, readOnly, dimensions = {longueur : '', largeu
 					),
 				}}
 			/>
+			{readOnly === false &&
 			<OptionField
 				dimensions={dimensions}
 				dimensionsNeeded={dimensionsNeeded}
 				setDimensions={setDimensions}
 			/>
+			}
 		</div>
 	)
 }

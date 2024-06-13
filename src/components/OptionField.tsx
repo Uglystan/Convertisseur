@@ -23,6 +23,8 @@ const textStyle = {
 
 function OptionField({dimensions, dimensionsNeeded, setDimensions} : OptionFieldProps) {
 
+	console.log("render Option")
+
 	const [error, setError] = React.useState<"info" | "error" | "success" | "warning">('info')
 
 	function handleKeyDown (event : React.KeyboardEvent, option : string | undefined) {
