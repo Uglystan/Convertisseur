@@ -16,6 +16,7 @@ function DimensionsNeeded (inputUnit : string, outputUnit : string) : Dimensions
 
 function Converter() {
 
+	console.log("Render convert")
 	// Hook useState qui permet de declarer un etat local dans un composant
 	// ce hook retourne un tableau avec la valeur actuel de l'etat et une fonction pour
 	// modifier l'etat
@@ -23,8 +24,6 @@ function Converter() {
 	const [inputAmount, setInputAmount] = React.useState<string> ('')
 	const [outputUnit, setOutputUnit] = React.useState<string>('BARRE')
 	const [outputAmount, setOutputAmount] = React.useState<string> ('')
-	const [errorMessage, setErrorMessage] = React.useState<string>('')
-	const [error, setError] = React.useState<boolean>(false)
 	const converter : ConverterClass = new ConverterClass()
 
 	// Les fonctions de mise a jour de l'etat sont deja optimisees par react pour ne pas changer de reference
@@ -62,10 +61,10 @@ function Converter() {
 	// Le code ci dessous sera donc execute si un des elements de la liste de dependance (2eme arg)
 	// change
 	React.useEffect(() => {
-		const n : DimensionsNeed = DimensionsNeeded(inputUnit, outputUnit)
-		const j : DimensionsNeed = {longueur : dimensions.longueur !== '', largeur : dimensions.largeur !== '', hauteur : dimensions.hauteur !== '', ratio : dimensions.ratio !== '', helper : n.helper}
+		const dimensionsRequired : DimensionsNeed = DimensionsNeeded(inputUnit, outputUnit)
+		const dimensionsActual : DimensionsNeed = {longueur : dimensions.longueur !== '', largeur : dimensions.largeur !== '', hauteur : dimensions.hauteur !== '', ratio : dimensions.ratio !== '', helper : dimensionsRequired.helper}
 
-		if(!error && inputAmount !== '' && n.longueur === j.longueur && n.largeur === j.largeur && n.hauteur === j.hauteur && n.ratio === j.ratio) {
+		if(inputAmount !== '' && dimensionsRequired.longueur === dimensionsActual.longueur && dimensionsRequired.largeur === dimensionsActual.largeur && dimensionsRequired.hauteur === dimensionsActual.hauteur && dimensionsRequired.ratio === dimensionsActual.ratio) {
 			converter.montant = parseFloat(inputAmount.replaceAll(',', '.'))
 			converter.inputUnit = inputUnit
 			converter.outputUnit = outputUnit
@@ -77,17 +76,9 @@ function Converter() {
 			}
 			setOutputAmount(converter.convert())
 		}
-		if (inputAmount === '')
+		if (inputAmount === '' && outputAmount !== '')
 			setOutputAmount('')
-	}, [error, inputAmount, inputUnit, outputUnit, dimensions, converter])
-
-	React.useEffect(() => {
-		if (errorMessage === '')
-			setError(false)
-		else
-			setError(true)
-	}, [errorMessage])
-
+	}, [inputAmount, inputUnit, outputUnit, dimensions, outputAmount])
 
 	return(
 		<Stack
@@ -99,15 +90,12 @@ function Converter() {
 			<InputField
 				unit={inputUnit}
 				amount={inputAmount}
-				errorMessage={errorMessage}
-				error={error}
 				readOnly={false}
 				dimensions={dimensions}
 				listUnit={listInputUnit}
 				dimensionsNeeded={DimensionsNeeded(inputUnit, outputUnit)}
 				handleUnitChange={handleInputUnitChange}
 				handleAmountChange={handleInputAmountChange}
-				setErrorMessage={setErrorMessage}
 				setDimensions={setDimensions}
 			/>
 			<InputField

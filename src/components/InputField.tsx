@@ -21,29 +21,31 @@ const MenuProps = {
 interface InputFieldProps {
 	unit : string
 	amount : string
-	errorMessage? : string
-	error? : boolean
 	readOnly: boolean
 	dimensions? : Dimensions
 	listUnit : Array<string>
 	dimensionsNeeded? : DimensionsNeed
 	handleUnitChange : (event : SelectChangeEvent<string>) => void
 	handleAmountChange : (event : React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void
-	setErrorMessage? : (value : React.SetStateAction<string>) => void
 	setDimensions? : (value: Dimensions) => void
 }
 
-function InputField({unit, amount, errorMessage = '', error = false, readOnly, dimensions = {longueur : '', largeur : '', hauteur : '', ratio : ''}, listUnit, dimensionsNeeded = {longueur : false, largeur : false, hauteur : false, ratio : false, helper : ''}, handleUnitChange, handleAmountChange, setErrorMessage = () => {}, setDimensions = () => {}} : InputFieldProps) {
+function InputField({unit, amount, readOnly, dimensions = {longueur : '', largeur : '', hauteur : '', ratio : ''}, listUnit, dimensionsNeeded = {longueur : false, largeur : false, hauteur : false, ratio : false, helper : ''}, handleUnitChange, handleAmountChange, setDimensions = () => {}} : InputFieldProps) {
+
+
+	console.log("render Input")
+
+	const [errorMessage, setErrorMessage] = React.useState<string>('')
 
 	function handleAmountUnitValidate () {
-		if (amount === '')
+		if (readOnly === false && amount === '')
 			setErrorMessage('Attention pas de prix saisie')
 		else
 			setErrorMessage('')
 	}
 
 	function handleKeyDown (event : React.KeyboardEvent) {
-		if (!/^\d*,?\d*$/.test(amount + event.key) && !["Backspace", "Tab", "Enter", "Escape", "ArrowLeft", "ArrowRight"].includes(event.key)) {
+		if (readOnly === false && !/^\d*,?\d*$/.test(amount + event.key) && !["Backspace", "Tab", "Enter", "Escape", "ArrowLeft", "ArrowRight"].includes(event.key)) {
 			event.preventDefault()
 			setErrorMessage("Uniquement des nombres et une virgule")
 		}
@@ -54,7 +56,7 @@ function InputField({unit, amount, errorMessage = '', error = false, readOnly, d
 	return (
 		<div>
 			<TextField
-				error={error}
+				error={errorMessage !== '' ? true : false}
 				helperText={errorMessage}
 				value={amount}
 				label="Prix"
