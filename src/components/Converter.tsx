@@ -8,7 +8,6 @@ import { Dimensions, DimensionsNeed } from '../types/converter_types'
 import { unitMap, conversionNeeds, listInputUnit } from '../config/convert_config'
 
 
-
 function dimensionsNeeded (inputUnit : string, outputUnit : string) : DimensionsNeed {
 	const key = `${inputUnit} to ${outputUnit}`
 	return conversionNeeds[key as keyof typeof conversionNeeds] || { longueur: false, largeur: false, hauteur: false, ratio: false , helper: ''}
@@ -23,19 +22,18 @@ function convertToNumber(dimensions : Dimensions) {
 		})
 }
 
-function checkDimensionMatch(dimensionsActual : Dimensions, dimensionsRequired : Dimensions) : boolean {
+function checkDimensionMatch(dimensions: Dimensions, dimensionsRequired : DimensionsNeed) : boolean {
 	return (
-		dimensionsRequired.longueur === dimensionsActual.longueur &&
-		dimensionsRequired.largeur === dimensionsActual.largeur &&
-		dimensionsRequired.hauteur === dimensionsActual.hauteur &&
-		dimensionsRequired.ratio === dimensionsActual.ratio
+		dimensionsRequired.longueur === (dimensions.longueur !== '') &&
+		dimensionsRequired.largeur === (dimensions.largeur !== '') &&
+		dimensionsRequired.hauteur === (dimensions.hauteur !== '') &&
+		dimensionsRequired.ratio === (dimensions.ratio !== '')
 	)
 }
 
 
 function Converter() {
-
-	console.log("Render convert")
+	
 	// Hook useState qui permet de declarer un etat local dans un composant
 	// ce hook retourne un tableau avec la valeur actuel de l'etat et une fonction pour
 	// modifier l'etat
@@ -43,14 +41,17 @@ function Converter() {
 	const [inputAmount, setInputAmount] = React.useState<string> ('')
 	const [outputUnit, setOutputUnit] = React.useState<string>('BARRE')
 	const [outputAmount, setOutputAmount] = React.useState<string> ('')
-	const converter : ConverterClass = new ConverterClass()
 
+	// Hook useRef qui permet de declarer une reference qui persiste a travers les rendus
+	// Cad que converter ne sera pas recreer entre chaque rendu 
+	const converter = React.useRef(new ConverterClass()).current
+	
 	// Les fonctions de mise a jour de l'etat sont deja optimisees par react pour ne pas changer de reference
 	// entre les rendus
 	const [dimensions, setDimensions] = React.useState<Dimensions>({longueur: '', largeur: '', hauteur: '', ratio : ''})
 
 	const handleInputUnitChange = useCallback((event : SelectChangeEvent<typeof inputUnit>) => {
-		const newUnit = event.target.value
+		const newUnit : string = event.target.value
 		setOutputUnit(unitMap[newUnit][0])
 		setInputUnit(newUnit)
 		setOutputAmount('')
@@ -81,9 +82,8 @@ function Converter() {
 	// change
 	React.useEffect(() => {
 		const dimensionsRequired : DimensionsNeed = dimensionsNeeded(inputUnit, outputUnit)
-		const dimensionsActual : DimensionsNeed = {longueur : dimensions.longueur !== '', largeur : dimensions.largeur !== '', hauteur : dimensions.hauteur !== '', ratio : dimensions.ratio !== '', helper : dimensionsRequired.helper}
 
-		if(inputAmount !== '' && dimensionsRequired.longueur === dimensionsActual.longueur && dimensionsRequired.largeur === dimensionsActual.largeur && dimensionsRequired.hauteur === dimensionsActual.hauteur && dimensionsRequired.ratio === dimensionsActual.ratio) {
+		if(inputAmount !== '' && checkDimensionMatch(dimensions, dimensionsRequired)) {
 			converter.montant = parseFloat(inputAmount.replaceAll(',', '.'))
 			converter.inputUnit = inputUnit
 			converter.outputUnit = outputUnit
