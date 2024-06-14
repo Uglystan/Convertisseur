@@ -49,7 +49,8 @@ class ConverterClass {
 	}
     
 	public set montant(value: number) {
-		if (value < 0) throw new Error("Le montant ne peut pas être égal ou plus petit que 0");
+		if (value < 0) 
+			throw new Error("Le montant ne peut pas être égal ou plus petit que 0");
 		this._montant = value
 	}
     
@@ -81,8 +82,10 @@ class ConverterClass {
 		const price = this._montant * factor
 		return `${Number(price.toFixed(this.precision)).toLocaleString('fr-FR')}`
 	}
-    
-	private convertWithDimensions(factor: number, divide : boolean, ...dimensionKeys: (keyof Dimensions)[]): string {
+
+	// ... operateur de reste dans les arguments de fonction type indefini d'argument
+	// ... operateur de spread dans une fonction sur un tableau pour faire une copie superficielle avec la reference qui change
+	private convertWithDimensions(factor: number, divide : boolean, ...dimensionKeys: ("longueur" | "largeur" | "hauteur" | "ratio") []): string {
 		let resultFactor = factor
 		let price 
 		for (const key of dimensionKeys) {
