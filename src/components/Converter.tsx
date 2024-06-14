@@ -2,8 +2,8 @@ import React, { useCallback } from 'react'
 import InputField from './InputField'
 import {SelectChangeEvent} from '@mui/material/Select'
 import ConverterClass from '../utils/ConvertisseurClass'
-import Stack from '@mui/material/Stack';
-import Divider from '@mui/material/Divider';
+import Stack from '@mui/material/Stack'
+import Divider from '@mui/material/Divider'
 import { Dimensions, DimensionsNeed } from '../types/converter_types'
 import { unitMap, conversionNeeds, listInputUnit } from '../config/convert_config'
 
@@ -49,14 +49,54 @@ function Converter() {
 	// Les fonctions de mise a jour de l'etat sont deja optimisees par react pour ne pas changer de reference
 	// entre les rendus
 	const [dimensions, setDimensions] = React.useState<Dimensions>({longueur: '', largeur: '', hauteur: '', ratio : ''})
+	
+	// Ici inclue pas dimensions dans les dependances car on remet juste dimensions a 0
+	const handleOutputUnitChange = useCallback ((event : SelectChangeEvent<typeof outputUnit>) => {
+		setOutputUnit(event.target.value)
+		setOutputAmount('')
+		let c : DimensionsNeed = dimensionsNeeded(inputUnit, outputUnit)
+		let t : DimensionsNeed = dimensionsNeeded(inputUnit, event.target.value)
+		setDimensions(prevDimensions => {
+			const newDimensions = { ...prevDimensions }
+			for (const key of (Object.keys(prevDimensions) as (keyof DimensionsNeed)[])) {
+			    if (c[key] !== t[key]) {
+				newDimensions[key as (keyof Dimensions)] = ''
+			    }
+			}
+			return newDimensions
+		    })
+	}, [dimensions, outputUnit])
 
 	const handleInputUnitChange = useCallback((event : SelectChangeEvent<typeof inputUnit>) => {
 		const newUnit : string = event.target.value
 		setOutputUnit(unitMap[newUnit][0])
 		setInputUnit(newUnit)
 		setOutputAmount('')
-		setDimensions({...dimensions, longueur : '', largeur : '', hauteur : '', ratio : ''})
-	}, [])
+		let c : DimensionsNeed = dimensionsNeeded(inputUnit, outputUnit)
+		let t : DimensionsNeed = dimensionsNeeded(newUnit, unitMap[newUnit][0])
+		// Fonction de mise a jour pour s'assurer de travailler avec le bon etat ceci  ne marche pas
+		// for (const key of (Object.keys(dimensions) as (keyof DimensionsNeed)[])) {
+		// 	if (c[key] !== t[key]) {
+		// 	    setDimensions({...dimensions, [key]: ''})
+		// 	    console.log(dimensions[key as (keyof Dimensions)])
+		// 	}
+		//     }
+		// En effet on faisait le modification une a une sans prendre en compte les MAJ
+		// precedente car setDImensions est async donc l'etat ne sera pas forcement mis a jour a chaque appel
+		// donc si on a au depat {'2', '2', '2', ''} a la fin on aura {'2', '2', '', ''} car les modification
+		// ne se seront pas effectue
+		// Ici on update tout dimensions en prenant compte des update precedente dans la boucle et on
+		// retourne l'objet entier
+		setDimensions(prevDimensions => {
+			const newDimensions = prevDimensions 
+			for (const key of (Object.keys(prevDimensions) as (keyof DimensionsNeed)[])) {
+			    if (c[key] !== t[key]) {
+				newDimensions[key as (keyof Dimensions)] = ''
+			    }
+			}
+			return newDimensions
+		})
+	}, [dimensions, outputUnit, inputUnit])
 	
 	// Hook useCallBack qui permet de "memoriser" des fonctions. Si une fonctions est passee comme prop
 	// a un composant enfant le fait d'utiliser ce hook permet de ne pas re-rendre la fonction si les
@@ -64,13 +104,6 @@ function Converter() {
 	// re-rendre un composant
 	const handleInputAmountChange = useCallback((event : React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
 		setInputAmount(event.target.value)
-	}, [])
-
-	// Ici inclue pas dimensions dans les dependances car on remet juste dimensions a 0
-	const handleOutputUnitChange = useCallback ((event : SelectChangeEvent<typeof outputUnit>) => {
-		setOutputUnit(event.target.value)
-		setOutputAmount('')
-		setDimensions({...dimensions, longueur : '', largeur : '', hauteur : '', ratio : ''})
 	}, [])
 	
 	const handleOutputAmountChange = useCallback((event : React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -83,6 +116,7 @@ function Converter() {
 	React.useEffect(() => {
 		const dimensionsRequired : DimensionsNeed = dimensionsNeeded(inputUnit, outputUnit)
 
+		console.log(dimensions, dimensionsRequired)
 		if(inputAmount !== '' && checkDimensionMatch(dimensions, dimensionsRequired)) {
 			converter.montant = parseFloat(inputAmount.replaceAll(',', '.'))
 			converter.inputUnit = inputUnit
