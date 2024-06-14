@@ -9,10 +9,29 @@ import { unitMap, conversionNeeds, listInputUnit } from '../config/convert_confi
 
 
 
-function DimensionsNeeded (inputUnit : string, outputUnit : string) : DimensionsNeed {
+function dimensionsNeeded (inputUnit : string, outputUnit : string) : DimensionsNeed {
 	const key = `${inputUnit} to ${outputUnit}`
 	return conversionNeeds[key as keyof typeof conversionNeeds] || { longueur: false, largeur: false, hauteur: false, ratio: false , helper: ''}
 }
+
+function convertToNumber(dimensions : Dimensions) {
+	return ({
+			longueur : parseFloat(dimensions.longueur.replaceAll(',', '.')),
+			largeur : parseFloat(dimensions.largeur.replaceAll(',', '.')),
+			hauteur : parseFloat(dimensions.hauteur.replaceAll(',', '.')),
+			ratio : parseFloat(dimensions.ratio.replaceAll(',', '.'))
+		})
+}
+
+function checkDimensionMatch(dimensionsActual : Dimensions, dimensionsRequired : Dimensions) : boolean {
+	return (
+		dimensionsRequired.longueur === dimensionsActual.longueur &&
+		dimensionsRequired.largeur === dimensionsActual.largeur &&
+		dimensionsRequired.hauteur === dimensionsActual.hauteur &&
+		dimensionsRequired.ratio === dimensionsActual.ratio
+	)
+}
+
 
 function Converter() {
 
@@ -61,19 +80,14 @@ function Converter() {
 	// Le code ci dessous sera donc execute si un des elements de la liste de dependance (2eme arg)
 	// change
 	React.useEffect(() => {
-		const dimensionsRequired : DimensionsNeed = DimensionsNeeded(inputUnit, outputUnit)
+		const dimensionsRequired : DimensionsNeed = dimensionsNeeded(inputUnit, outputUnit)
 		const dimensionsActual : DimensionsNeed = {longueur : dimensions.longueur !== '', largeur : dimensions.largeur !== '', hauteur : dimensions.hauteur !== '', ratio : dimensions.ratio !== '', helper : dimensionsRequired.helper}
 
 		if(inputAmount !== '' && dimensionsRequired.longueur === dimensionsActual.longueur && dimensionsRequired.largeur === dimensionsActual.largeur && dimensionsRequired.hauteur === dimensionsActual.hauteur && dimensionsRequired.ratio === dimensionsActual.ratio) {
 			converter.montant = parseFloat(inputAmount.replaceAll(',', '.'))
 			converter.inputUnit = inputUnit
 			converter.outputUnit = outputUnit
-			converter.dimensions = {
-				longueur : parseFloat(dimensions.longueur.replaceAll(',', '.')),
-				largeur : parseFloat(dimensions.largeur.replaceAll(',', '.')),
-				hauteur : parseFloat(dimensions.hauteur.replaceAll(',', '.')),
-				ratio : parseFloat(dimensions.ratio.replaceAll(',', '.'))
-			}
+			converter.dimensions = convertToNumber(dimensions)
 			setOutputAmount(converter.convert())
 		}
 		if (inputAmount === '' && outputAmount !== '')
@@ -93,7 +107,7 @@ function Converter() {
 				readOnly={false}
 				dimensions={dimensions}
 				listUnit={listInputUnit}
-				dimensionsNeeded={DimensionsNeeded(inputUnit, outputUnit)}
+				dimensionsNeeded={dimensionsNeeded(inputUnit, outputUnit)}
 				handleUnitChange={handleInputUnitChange}
 				handleAmountChange={handleInputAmountChange}
 				setDimensions={setDimensions}
