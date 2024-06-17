@@ -25,12 +25,12 @@ interface InputFieldProps {
 	dimensions? : Dimensions
 	listUnit : Array<string>
 	dimensionsNeeded? : DimensionsNeed
-	handleUnitChange : (event : SelectChangeEvent<string>) => void
+	onChangeUnit : (event : SelectChangeEvent<string>, option : string) => void
 	handleAmountChange : (event : React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void
 	setDimensions? : (value: Dimensions) => void
 }
 
-function InputField({unit, amount, readOnly, dimensions = {longueur : '', largeur : '', hauteur : '', ratio : ''}, listUnit, dimensionsNeeded = {longueur : false, largeur : false, hauteur : false, ratio : false, helper : ''}, handleUnitChange, handleAmountChange, setDimensions = () => {}} : InputFieldProps) {
+function InputField({unit, amount, readOnly, dimensions = {longueur : '', largeur : '', hauteur : '', ratio : ''}, listUnit, dimensionsNeeded = {longueur : false, largeur : false, hauteur : false, ratio : false, helper : ''}, onChangeUnit, handleAmountChange, setDimensions = () => {}} : InputFieldProps) {
 
 
 	console.log("render Input")
@@ -73,7 +73,7 @@ function InputField({unit, amount, readOnly, dimensions = {longueur : '', largeu
 								<Select
 									sx={{minWidth: 75}}
 									value={unit}
-									onChange={handleUnitChange}
+									onChange={(event) =>  onChangeUnit(event, readOnly ? 'output' : 'input')}
 									inputProps={{ 'aria-label': 'Without label' }}
 									MenuProps={MenuProps}
 								>

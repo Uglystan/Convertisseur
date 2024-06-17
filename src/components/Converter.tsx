@@ -49,31 +49,21 @@ function Converter() {
 	// Les fonctions de mise a jour de l'etat sont deja optimisees par react pour ne pas changer de reference
 	// entre les rendus
 	const [dimensions, setDimensions] = React.useState<Dimensions>({longueur: '', largeur: '', hauteur: '', ratio : ''})
-	
-	// Ici inclue pas dimensions dans les dependances car on remet juste dimensions a 0
-	const handleOutputUnitChange = useCallback ((event : SelectChangeEvent<typeof outputUnit>) => {
-		setOutputUnit(event.target.value)
-		setOutputAmount('')
-		let c : DimensionsNeed = dimensionsNeeded(inputUnit, outputUnit)
-		let t : DimensionsNeed = dimensionsNeeded(inputUnit, event.target.value)
-		setDimensions(prevDimensions => {
-			const newDimensions = { ...prevDimensions }
-			for (const key of (Object.keys(prevDimensions) as (keyof DimensionsNeed)[])) {
-			    if (c[key] !== t[key]) {
-				newDimensions[key as (keyof Dimensions)] = ''
-			    }
-			}
-			return newDimensions
-		    })
-	}, [dimensions, outputUnit])
 
-	const handleInputUnitChange = useCallback((event : SelectChangeEvent<typeof inputUnit>) => {
-		const newUnit : string = event.target.value
-		setOutputUnit(unitMap[newUnit][0])
-		setInputUnit(newUnit)
+	const onChangeUnit = useCallback((event : SelectChangeEvent<typeof outputUnit>, option : string) => {
+		const newValue = event.target.value
+		let newRequiredDimensions : DimensionsNeed
+		if (option === 'output') {
+			setOutputUnit(newValue)
+			newRequiredDimensions = dimensionsNeeded(newValue, newValue)
+		}
+		else {
+			setOutputUnit(unitMap[newValue][0])
+			setInputUnit(newValue)
+			newRequiredDimensions = dimensionsNeeded(newValue, unitMap[newValue][0])
+		}
 		setOutputAmount('')
-		let c : DimensionsNeed = dimensionsNeeded(inputUnit, outputUnit)
-		let t : DimensionsNeed = dimensionsNeeded(newUnit, unitMap[newUnit][0])
+		const actualRequieredDimensions : DimensionsNeed = dimensionsNeeded(inputUnit, outputUnit)
 		// Fonction de mise a jour pour s'assurer de travailler avec le bon etat ceci  ne marche pas
 		// for (const key of (Object.keys(dimensions) as (keyof DimensionsNeed)[])) {
 		// 	if (c[key] !== t[key]) {
@@ -88,11 +78,10 @@ function Converter() {
 		// Ici on update tout dimensions en prenant compte des update precedente dans la boucle et on
 		// retourne l'objet entier
 		setDimensions(prevDimensions => {
-			const newDimensions = prevDimensions 
+			const newDimensions = {...prevDimensions}
 			for (const key of (Object.keys(prevDimensions) as (keyof DimensionsNeed)[])) {
-			    if (c[key] !== t[key]) {
-				newDimensions[key as (keyof Dimensions)] = ''
-			    }
+				if (actualRequieredDimensions[key] !== newRequiredDimensions[key])
+					newDimensions[key as (keyof Dimensions)] = ''
 			}
 			return newDimensions
 		})
@@ -142,7 +131,7 @@ function Converter() {
 				dimensions={dimensions}
 				listUnit={listInputUnit}
 				dimensionsNeeded={dimensionsNeeded(inputUnit, outputUnit)}
-				handleUnitChange={handleInputUnitChange}
+				onChangeUnit={onChangeUnit}
 				handleAmountChange={handleInputAmountChange}
 				setDimensions={setDimensions}
 			/>
@@ -151,7 +140,7 @@ function Converter() {
 				amount={outputAmount}
 				readOnly={true}
 				listUnit={unitMap[inputUnit]}
-				handleUnitChange={handleOutputUnitChange}
+				onChangeUnit={onChangeUnit}
 				handleAmountChange={handleOutputAmountChange}
 			/>
 		</Stack>
