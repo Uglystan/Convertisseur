@@ -50,12 +50,16 @@ function Converter() {
 	// entre les rendus
 	const [dimensions, setDimensions] = React.useState<Dimensions>({longueur: '', largeur: '', hauteur: '', ratio : ''})
 
+	// Hook useCallBack qui permet de "memoriser" des fonctions. Si une fonctions est passee comme prop
+	// a un composant enfant le fait d'utiliser ce hook permet de ne pas re-rendre la fonction si les
+	// dependances de cette fonction (2eme arguments) n'ont pas change. car de base une fonction fait
+	// re-rendre un composant
 	const onChangeUnit = useCallback((event : SelectChangeEvent<typeof outputUnit>, option : string) => {
 		const newValue = event.target.value
 		let newRequiredDimensions : DimensionsNeed
 		if (option === 'output') {
 			setOutputUnit(newValue)
-			newRequiredDimensions = dimensionsNeeded(newValue, newValue)
+			newRequiredDimensions = dimensionsNeeded(inputUnit, newValue)
 		}
 		else {
 			setOutputUnit(unitMap[newValue][0])
@@ -86,18 +90,6 @@ function Converter() {
 			return newDimensions
 		})
 	}, [dimensions, outputUnit, inputUnit])
-	
-	// Hook useCallBack qui permet de "memoriser" des fonctions. Si une fonctions est passee comme prop
-	// a un composant enfant le fait d'utiliser ce hook permet de ne pas re-rendre la fonction si les
-	// dependances de cette fonction (2eme arguments) n'ont pas change. car de base une fonction fait
-	// re-rendre un composant
-	const handleInputAmountChange = useCallback((event : React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-		setInputAmount(event.target.value)
-	}, [])
-	
-	const handleOutputAmountChange = useCallback((event : React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-		setOutputAmount(event.target.value)
-	}, [])
 
 	// Hook useEffect qui permet de generer des effets de bord en fonction d'une liste de dependance
 	// Le code ci dessous sera donc execute si un des elements de la liste de dependance (2eme arg)
@@ -132,7 +124,7 @@ function Converter() {
 				listUnit={listInputUnit}
 				dimensionsNeeded={dimensionsNeeded(inputUnit, outputUnit)}
 				onChangeUnit={onChangeUnit}
-				handleAmountChange={handleInputAmountChange}
+				setAmount={setInputAmount}
 				setDimensions={setDimensions}
 			/>
 			<InputField
@@ -141,7 +133,7 @@ function Converter() {
 				readOnly={true}
 				listUnit={unitMap[inputUnit]}
 				onChangeUnit={onChangeUnit}
-				handleAmountChange={handleOutputAmountChange}
+				setAmount={setOutputAmount}
 			/>
 		</Stack>
 	)

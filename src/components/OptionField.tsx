@@ -28,9 +28,8 @@ function OptionField({dimensions, dimensionsNeeded, setDimensions} : OptionField
 	const [error, setError] = React.useState<"info" | "error" | "success" | "warning">('info')
 
 	function handleKeyDown (event : React.KeyboardEvent, option : string | undefined) {
-		if (!/^\d*,?\d*$/.test(option + event.key) && !["Backspace", "Tab", "Enter", "Escape", "ArrowLeft", "ArrowRight"].includes(event.key)) {
+		if (/^\d*,?\d*$/.test(option + event.key) === false && ["Backspace", "Tab", "Enter", "Escape", "ArrowLeft", "ArrowRight"].includes(event.key) === false)
 			event.preventDefault()
-		}
 	}
 
 	function handleDimensionsChange(event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, option: string) {

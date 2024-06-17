@@ -7,17 +7,6 @@ import Select, {SelectChangeEvent} from '@mui/material/Select'
 import OptionField from './OptionField'
 import { Dimensions, DimensionsNeed } from '../types/converter_types'
 
-const ITEM_HEIGHT = 48
-const ITEM_PADDING_TOP = 8
-
-const MenuProps = {
-  PaperProps: {
-    style: {
-      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-    },
-  },
-}
-
 interface InputFieldProps {
 	unit : string
 	amount : string
@@ -26,15 +15,12 @@ interface InputFieldProps {
 	listUnit : Array<string>
 	dimensionsNeeded? : DimensionsNeed
 	onChangeUnit : (event : SelectChangeEvent<string>, option : string) => void
-	handleAmountChange : (event : React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void
+	setAmount : (value : string) => void
 	setDimensions? : (value: Dimensions) => void
 }
 
-function InputField({unit, amount, readOnly, dimensions = {longueur : '', largeur : '', hauteur : '', ratio : ''}, listUnit, dimensionsNeeded = {longueur : false, largeur : false, hauteur : false, ratio : false, helper : ''}, onChangeUnit, handleAmountChange, setDimensions = () => {}} : InputFieldProps) {
-
-
-	console.log("render Input")
-
+function InputField({unit, amount, readOnly, dimensions = {longueur : '', largeur : '', hauteur : '', ratio : ''}, listUnit, dimensionsNeeded = {longueur : false, largeur : false, hauteur : false, ratio : false, helper : ''}, onChangeUnit, setAmount, setDimensions = () => {}} : InputFieldProps) {
+	
 	const [errorMessage, setErrorMessage] = React.useState<string>('')
 
 	function handleAmountUnitValidate () {
@@ -45,7 +31,7 @@ function InputField({unit, amount, readOnly, dimensions = {longueur : '', largeu
 	}
 
 	function handleKeyDown (event : React.KeyboardEvent) {
-		if (readOnly === false && !/^\d*,?\d*$/.test(amount + event.key) && !["Backspace", "Tab", "Enter", "Escape", "ArrowLeft", "ArrowRight"].includes(event.key)) {
+		if (readOnly === false && /^\d*,?\d*$/.test(amount + event.key) === false && ["Backspace", "Tab", "Enter", "Escape", "ArrowLeft", "ArrowRight"].includes(event.key) === false) {
 			event.preventDefault()
 			setErrorMessage("Uniquement des nombres et une virgule")
 		}
@@ -62,7 +48,7 @@ function InputField({unit, amount, readOnly, dimensions = {longueur : '', largeu
 				label="Prix"
 				variant="outlined"
 				sx={{m : 2, minWidth: 120}}
-				onChange={handleAmountChange}
+				onChange={(event) => setAmount(event.target.value)}
 				onBlur={handleAmountUnitValidate}
 				onKeyDown={handleKeyDown}
 				InputProps={{
@@ -75,7 +61,6 @@ function InputField({unit, amount, readOnly, dimensions = {longueur : '', largeu
 									value={unit}
 									onChange={(event) =>  onChangeUnit(event, readOnly ? 'output' : 'input')}
 									inputProps={{ 'aria-label': 'Without label' }}
-									MenuProps={MenuProps}
 								>
 									{listUnit.map((unit) => (
 										<MenuItem id="list-unit" key={unit} value={unit}>€/{unit}</MenuItem>
