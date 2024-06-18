@@ -89,7 +89,7 @@ function Converter() {
 			}
 			return newDimensions
 		})
-	}, [dimensions, outputUnit, inputUnit])
+	}, [outputUnit, inputUnit])
 
 	// Hook useEffect qui permet de generer des effets de bord en fonction d'une liste de dependance
 	// Le code ci dessous sera donc execute si un des elements de la liste de dependance (2eme arg)

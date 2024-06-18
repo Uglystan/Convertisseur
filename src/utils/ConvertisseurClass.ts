@@ -19,32 +19,32 @@ class ConverterClass {
 		this._outputUnit = ''
 		this._dimensions = {}
 		this._convertTab = {
-			"HM to BARRE": () => this.convertWithDimensions(1 / 100, false, 'longueur'),
-			"KG to FLACON de 800G": () => this.convertSimple(0.8),
-			"KG to SAC de 15KG": () => this.convertSimple(15),
-			"X50 to U": () => this.convertSimple(1 / 50),
-			"L to POT de 16L": () => this.convertSimple(16),
-			"HM to M": () => this.convertSimple(1 / 100),
-			"ROULEAU to M": () => this.convertWithDimensions(1, false, 'longueur'),
-			"M² to LAME": () => this.convertWithDimensions(1, false, 'longueur', 'largeur'),
-			"M² to PANNEAU": () => this.convertWithDimensions(1, false, 'longueur', 'largeur'),
-			"M² to ROULEAU": () => this.convertWithDimensions(1, false, 'longueur', 'largeur'),
-			"M³ to BARRE": () => this.convertWithDimensions(1, false, 'longueur', 'largeur', 'hauteur'),
-			"M to BARRE": () => this.convertWithDimensions(1, false, 'longueur'),
-			"PALETTE de 15 BARRE to BARRE": () => this.convertSimple(1 / 15),
-			"X100 to BOITE de 50": () => this.convertSimple(1 / 2),
-			"HM to U": () => this.convertWithDimensions(1 / 100, false, 'longueur'),
-			"KG to M²": () => this.convertWithDimensions(1, false, 'ratio'),
-			"L to M²": () => this.convertWithDimensions(1, false, 'ratio'),
-			"M² to M³": () => this.convertWithDimensions(1, true, 'hauteur'),
-			"M² to M": () => this.convertWithDimensions(1, false, 'largeur'),
-			"M³ to M": () => this.convertWithDimensions(1, false, 'largeur', 'hauteur'),
-			"M to U": () => this.convertWithDimensions(1, false, 'longueur'),
-			"PALETTE de 15 BARRE to M": () => this.convertWithDimensions(1 / 15, false, 'longueur'),
-			"ROULEAU to M²": () => this.convertWithDimensions(1, true, 'longueur', 'largeur'),
-			"U to M": () => this.convertWithDimensions(1, true, 'longueur'),
-			"X50 to M": () => this.convertWithDimensions(1 / 50, true, 'longueur'),
-			"SAC de 25KG to M²": () => this.convertWithDimensions(1 / 25, false, 'ratio')
+			"HM to BARRE": () => this.convertFunction(1 / 100, false, 'longueur'),
+			"KG to FLACON de 800G": () => this.convertFunction(0.8, false),
+			"KG to SAC de 15KG": () => this.convertFunction(15, false),
+			"X50 to U": () => this.convertFunction(1 / 50, false),
+			"L to POT de 16L": () => this.convertFunction(16, false),
+			"HM to M": () => this.convertFunction(1 / 100, false),
+			"ROULEAU to M": () => this.convertFunction(1, false, 'longueur'),
+			"M² to LAME": () => this.convertFunction(1, false, 'longueur', 'largeur'),
+			"M² to PANNEAU": () => this.convertFunction(1, false, 'longueur', 'largeur'),
+			"M² to ROULEAU": () => this.convertFunction(1, false, 'longueur', 'largeur'),
+			"M³ to BARRE": () => this.convertFunction(1, false, 'longueur', 'largeur', 'hauteur'),
+			"M to BARRE": () => this.convertFunction(1, false, 'longueur'),
+			"PALETTE de 15 BARRE to BARRE": () => this.convertFunction(1 / 15, false),
+			"X100 to BOITE de 50": () => this.convertFunction(1 / 2, false),
+			"HM to U": () => this.convertFunction(1 / 100, false, 'longueur'),
+			"KG to M²": () => this.convertFunction(1, false, 'ratio'),
+			"L to M²": () => this.convertFunction(1, false, 'ratio'),
+			"M² to M³": () => this.convertFunction(1, true, 'hauteur'),
+			"M² to M": () => this.convertFunction(1, false, 'largeur'),
+			"M³ to M": () => this.convertFunction(1, false, 'largeur', 'hauteur'),
+			"M to U": () => this.convertFunction(1, false, 'longueur'),
+			"PALETTE de 15 BARRE to M": () => this.convertFunction(1 / 15, false, 'longueur'),
+			"ROULEAU to M²": () => this.convertFunction(1, true, 'longueur', 'largeur'),
+			"U to M": () => this.convertFunction(1, true, 'longueur'),
+			"X50 to M": () => this.convertFunction(1 / 50, true, 'longueur'),
+			"SAC de 25KG to M²": () => this.convertFunction(1 / 25, false, 'ratio')
 	    	};
 	}
     
@@ -77,15 +77,10 @@ class ConverterClass {
 		else 
 			return "Conversion non supportée"
 	}
-    
-	private convertSimple(factor: number): string {
-		const price = this._montant * factor
-		return `${Number(price.toFixed(this.precision)).toLocaleString('fr-FR')}`
-	}
 
 	// ... operateur de reste dans les arguments de fonction type indefini d'argument
 	// ... operateur de spread dans une fonction sur un tableau pour faire une copie superficielle avec la reference qui change
-	private convertWithDimensions(factor: number, divide : boolean, ...dimensionKeys: ("longueur" | "largeur" | "hauteur" | "ratio") []): string {
+	private convertFunction(factor: number, divide : boolean, ...dimensionKeys: ("longueur" | "largeur" | "hauteur" | "ratio") []): string {
 		let resultFactor = factor
 		let price 
 		for (const key of dimensionKeys) {
