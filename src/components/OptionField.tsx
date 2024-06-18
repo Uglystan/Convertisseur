@@ -23,8 +23,6 @@ const textStyle = {
 
 function OptionField({dimensions, dimensionsNeeded, setDimensions} : OptionFieldProps) {
 
-	console.log("render Option")
-
 	const [error, setError] = React.useState<"info" | "error" | "success" | "warning">('info')
 
 	function handleKeyDown (event : React.KeyboardEvent, option : string | undefined) {
@@ -32,24 +30,12 @@ function OptionField({dimensions, dimensionsNeeded, setDimensions} : OptionField
 			event.preventDefault()
 	}
 
-	function handleDimensionsChange(event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, option: string) {
-		if (option === 'longueur')
-			setDimensions({...dimensions, longueur: event.target.value})
-		else if (option === 'largeur')
-			setDimensions({...dimensions, largeur: event.target.value})
-		else if (option === 'hauteur')
-			setDimensions({...dimensions, hauteur: event.target.value})
-		else if (option === 'ratio')
-			setDimensions({...dimensions, ratio: event.target.value})
+	function handleDimensionsChange(event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, option : ('longueur' | 'largeur' | 'hauteur' | 'ratio')) {
+		setDimensions({...dimensions, [option] : event.target.value})
 	}
 
-	function handleOnBlur(option : string) {
-		if (
-			(option === 'longueur' && dimensions.longueur === '') ||
-			(option === 'largeur' && dimensions.largeur === '') ||
-			(option === 'hauteur' && dimensions.hauteur === '') ||
-			(option === 'ratio' && dimensions.ratio === '')
-		)
+	function handleOnBlur(option : ('longueur' | 'largeur' | 'hauteur' | 'ratio')) {
+		if (dimensions[option] === "")
 			setError("error")
 		else
 			setError("info")
